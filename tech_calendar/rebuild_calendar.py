@@ -1,3 +1,4 @@
+import contextlib
 import re
 from openpyxl import load_workbook, Workbook
 from openpyxl.worksheet.worksheet import Worksheet
@@ -17,11 +18,9 @@ class ExcelProcessor:
         for column in worksheet.columns:
             max_length = 0
             for cell in column:
-                try:
+                with contextlib.suppress(TypeError):
                     if cell.value and len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
-                except TypeError:
-                    pass
             adjusted_width = (max_length + 2)
             worksheet.column_dimensions[column[0].column_letter].width = adjusted_width
 
@@ -63,9 +62,9 @@ class ExcelProcessor:
         action_match = action_pattern.search(job_comment)
 
         # Extract ENG and circuit type if found
-        eng = eng_match.group(0) if eng_match else ''
-        circuit_type = circuit_match.group(0) if circuit_match else ''
-        action = action_match.group(0) if action_match else ''
+        eng = eng_match[0] if eng_match else ''
+        circuit_type = circuit_match[0] if circuit_match else ''
+        action = action_match[0] if action_match else ''
 
         return eng, action, circuit_type
 
